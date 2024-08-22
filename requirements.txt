@@ -5,3 +5,4 @@ shap
 numpy
 matplotlib
 scikit-learn
+numba
