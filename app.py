@@ -92,3 +92,5 @@ else:
     shap.summary_plot(shap_values, X_tsne, show=False, class_names={0:'Cluster 0', 1:'Cluster 1', 2:'Cluster 2', 3:'Cluster 3', 4:'Cluster 4'},class_inds='original')
     plt.gcf().set_size_inches(12, 8)
     st.pyplot(plt)
+
+# URL du dashboard en ligne : https://projet10.streamlit.app
