@@ -5,6 +5,7 @@ import shap
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.cluster import KMeans
+from sklearn.metrics import adjusted_rand_score
 
 # Fonction pour charger les données en fonction du modèle sélectionné
 def load_data(model_name):
@@ -68,14 +69,19 @@ else:
     
     # Calcul des clusters (KMeans)
     X_tsne = df_embeddings[['tsne1', 'tsne2', 'tsne3']].values
-    cls_clip = KMeans(n_clusters=5, random_state=6)
-    cls_clip.fit(X_tsne)
+    cls_model = KMeans(n_clusters=5, random_state=6)
+    df_embeddings['cluster'] = cls_model.fit_predict(X_tsne)
+
+    # Calculer le score ARI
+    ari_score = adjusted_rand_score(df_embeddings['class'], df_embeddings['cluster'])
+    
+    st.subheader(f"Score ARI : {ari_score:.3f}")
     
     # Fonction pour prédire les distances aux centres des clusters
     def predict_cluster_distances(data):
         columns = ['tsne1', 'tsne2', 'tsne3']
         data_df = pd.DataFrame(data, columns=columns)
-        return cls_clip.transform(data_df)
+        return cls_model.transform(data_df)
 
     # Utiliser SHAP pour expliquer les distances aux clusters
     explainer = shap.KernelExplainer(predict_cluster_distances, X_tsne)
