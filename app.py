@@ -101,6 +101,22 @@ else:
     ari_score = adjusted_rand_score(df_embeddings['class'], df_embeddings['cluster'])
     
     st.subheader(f"Score ARI : {ari_score:.3f}")
+    
+    # Fonction pour prédire les distances aux centres des clusters
+    def predict_cluster_distances(data):
+        columns = ['tsne1', 'tsne2', 'tsne3']
+        data_df = pd.DataFrame(data, columns=columns)
+        return cls_model.transform(data_df)
+
+    # Utiliser SHAP pour expliquer les distances aux clusters
+    explainer = shap.KernelExplainer(predict_cluster_distances, X_tsne)
+    shap_values = explainer.shap_values(X_tsne)
+
+    # Visualiser l'importance des features avec SHAP
+    st.subheader("Interprétabilité avec SHAP")
+    shap.summary_plot(shap_values, X_tsne, show=False, class_names={0:'Cluster 0', 1:'Cluster 1', 2:'Cluster 2', 3:'Cluster 3', 4:'Cluster 4'},class_inds='original')
+    plt.gcf().set_size_inches(12, 8)
+    st.pyplot(plt)
 
     # Calcul de la matrice de confusion
     conf_mat = metrics.confusion_matrix(df_embeddings['num_class'], df_embeddings['cluster'])
@@ -112,22 +128,6 @@ else:
     st.subheader("Heatmap entre les Clusters et les Catégories des Images")
     plt.figure(figsize=(8, 6))
     sns.heatmap(df_cm, annot=True, cmap="Blues", fmt='d')
-    st.pyplot(plt)
-    
-    # Fonction pour prédire les distances aux centres des clusters
-    def predict_cluster_distances(data):
-        columns = ['tsne1', 'tsne2', 'tsne3']
-        data_df = pd.DataFrame(data, columns=columns)
-        return cls_model.transform(data_df)
-
-    # Utiliser SHAP pour expliquer les distances aux clusters
-    explainer = shap.KernelExplainer(predict_cluster_distances, X_tsne)
-    shap_values = explainer.shap_values(X_tsne, silent=True)
-
-    # Visualiser l'importance des features avec SHAP
-    st.subheader("Interprétabilité avec SHAP")
-    shap.summary_plot(shap_values, X_tsne, show=False, class_names={0:'Cluster 0', 1:'Cluster 1', 2:'Cluster 2', 3:'Cluster 3', 4:'Cluster 4'},class_inds='original')
-    plt.gcf().set_size_inches(12, 8)
     st.pyplot(plt)
 
 # URL du dashboard en ligne : https://projet10.streamlit.app
