@@ -122,7 +122,7 @@ else:
 
     # Utiliser SHAP pour expliquer les distances aux clusters
     explainer = shap.KernelExplainer(predict_cluster_distances, X_tsne)
-    shap_values = explainer.shap_values(X_tsne)
+    shap_values = explainer.shap_values(X_tsne, silent=True)
 
     # Visualiser l'importance des features avec SHAP
     st.subheader("Interprétabilité avec SHAP")
