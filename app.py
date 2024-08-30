@@ -5,6 +5,7 @@ import shap
 import seaborn as sns
 import numpy as np
 import matplotlib.pyplot as plt
+import pickle
 from sklearn.cluster import KMeans
 from sklearn.metrics import adjusted_rand_score
 from sklearn import metrics
@@ -29,6 +30,19 @@ def load_data(model_name):
         return pd.read_csv("df_tsne_clip.csv")
     else:
         return pd.DataFrame(columns=["tsne1", "tsne2", "tsne3", "class"])
+
+def load_shap_values(model_name):
+    if model_name == "SIFT":
+        with open('shap_values_sift.pkl', 'rb') as f:
+            return pickle.load(f)
+    elif model_name == "CNN":
+        with open('shap_values_cnn.pkl', 'rb') as f:
+            return pickle.load(f)
+    elif model_name == "CLIP":
+        with open('shap_values_clip.pkl', 'rb') as f:
+            return pickle.load(f)
+    else:
+        return None
 
 # Titre de l'application
 st.title("Dashboard classification photos restaurants avec CLIP d'OpenAI")
@@ -101,17 +115,10 @@ else:
     ari_score = adjusted_rand_score(df_embeddings['class'], df_embeddings['cluster'])
     
     st.subheader(f"Score ARI : {ari_score:.3f}")
-    
-    # Fonction pour prédire les distances aux centres des clusters
-    def predict_cluster_distances(data):
-        columns = ['tsne1', 'tsne2', 'tsne3']
-        data_df = pd.DataFrame(data, columns=columns)
-        return cls_model.transform(data_df)
 
-    # Utiliser SHAP pour expliquer les distances aux clusters
-    explainer = shap.KernelExplainer(predict_cluster_distances, X_tsne)
-    shap_values = explainer.shap_values(X_tsne)
-
+    # Charger les valeurs SHAP pré-calculées
+    shap_values = load_shap_values(model_name)
+        
     # Visualiser l'importance des features avec SHAP
     st.subheader("Interprétabilité avec SHAP")
     shap.summary_plot(shap_values, X_tsne, show=False, class_names={0:'Cluster 0', 1:'Cluster 1', 2:'Cluster 2', 3:'Cluster 3', 4:'Cluster 4'},class_inds='original')
